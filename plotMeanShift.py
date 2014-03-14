@@ -12,17 +12,17 @@ from random import sample
 
 ###############################################################################
 # Read data
-df = pd.read_csv('./cleanedData.csv', encoding='latin1')
+df = pd.read_csv('./data.csv', sep='\t')
 
 # select latitude and longitude
-X = df[['longitude', 'latitude']].values
+X = df.ix[:,7:9].values
 ###############################################################################
 # Compute clustering with MeanShift
 
 # The following bandwidth can be automatically detected using
-bandwidth = estimate_bandwidth(X,quantile = 0.0001, n_samples=20000)
+bandwidth = estimate_bandwidth(X,quantile = 0.0005, n_samples=20000)
 
-ms = MeanShift(bandwidth=bandwidth, bin_seeding=True)
+ms = MeanShift(bandwidth=bandwidth, bin_seeding=True, cluster_all=False)
 ms.fit(X)
 labels = ms.labels_
 cluster_centers = ms.cluster_centers_
@@ -47,11 +47,11 @@ print(len(X))
 X = unique(X)
 print(len(X))
 
-for item in X:
-    print(item[1], item[0])
-    mymap.addradpoint(item[1], item[0], 10, "#0000FF")
+#for item in X:
+#    print(item[1], item[0])
+#    mymap.addpoint(item[0], item[1], "#0000FF")
 for item in cluster_centers:
-    mymap.addradpoint(item[1], item[0], 10, "#FF00FF")
+    mymap.addpoint(item[0], item[1], "#FF00FF")
 mymap.draw('./mymap.draw.html')
 url = './mymap.draw.html'
 webbrowser.get('chromium').open_new_tab(url)
