@@ -1,7 +1,6 @@
 console.log('import')
 
 function initialize() {
-    console.log('1')
     var mapOptions = 
     {
         center: new google.maps.LatLng(45.76, 4.83),
@@ -11,7 +10,6 @@ function initialize() {
 }
 
 function addMarker(position) {
-    console.log('2');
     var marker = new google.maps.Marker({
         map: map,
         draggable: false,
@@ -19,13 +17,34 @@ function addMarker(position) {
     });
 }
 
+function addCluster(cluster) {
+    color = Math.floor(Math.random() * 256.0 * 256.0 * 256.0);
+    color = '#' + color.toString(16);
+
+    var clusterOptions = {
+        strokeColor: color,
+        strokeOpacity: 0.7,
+        strokeWeight: 2,
+        fillColor: color,
+        fillOpacity: 0.2,
+        map: map,
+        center: new google.maps.LatLng(cluster.latitude, cluster.longitude),
+        radius: cluster.radius 
+    };
+    
+    var circle = new google.maps.Circle(clusterOptions);
+}
+
 function initData() {
-    console.log('2');
-    var markers = $.getJSON("http://127.0.0.1:5000/markers", function() {
-      console.log( "success" );
+    var data = $.getJSON("http://127.0.0.1:5000/data", function(data) {
+        console.log( "loading data" );
+        $.each(data, function(i, cluster) {
+            addCluster(cluster);
+        });
+
 })
   .done(function() {
-          console.log( "second success" );
+          console.log( "markers loaded" );
             })
   .fail(function() {
           console.log( "error" );

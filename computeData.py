@@ -8,10 +8,13 @@ import pandas as pd
 import json
 from sklearn.cluster import MeanShift, estimate_bandwidth
 from flask import Flask, render_template
+from modele import cluster
+
 app = Flask(__name__)
 X = []
 labels = []
 cluster_centers = []
+clusterDict = dict()
 
 def initialize():
     df = pd.read_csv('./data.csv', sep='\t')
@@ -32,8 +35,6 @@ def computeClusters(df):
     labels = ms.labels_
     cluster_centers = ms.cluster_centers_
 
-    labels_unique = np.unique(labels)
-
     return X, labels, cluster_centers
 
 def unique(a):
@@ -49,19 +50,10 @@ def unique(a):
 def mainHtml():
     return render_template('js.html')
 
-@app.route('/clusters')
-def clusters():
-    global cluster_centers
-    return json.dumps(cluster_centers)
-
-@app.route('/markers')
+@app.route('/data')
 def markers():    
-    global X
-    global labels
-    data = dict()
-    for i, x in enumerate(X):
-        data[i] = x + [labels[i]]
-    return json.dumps(data)
+    global clusterDict
+    return json.dumps([clusterDict[item].__dict__ for item in clusterDict.keys()])
 
 
 if __name__ == '__main__':
@@ -69,9 +61,21 @@ if __name__ == '__main__':
     global X
     global labels
     global cluster_centers
+    global clusterDict
     X, labels, cluster_centers = computeClusters(df)
     X = X.tolist()
     labels = labels.tolist()
     cluster_centers = cluster_centers.tolist()
-    app.run(debug=True)
+    total = 0
+    for i, item in enumerate(cluster_centers):
+        print("adding" + str(i))
+        clusterDict[i] = cluster(i, item[0], item[1])
+        print(json.dumps(clusterDict[i].__dict__))
 
+    for i, item in enumerate(X):
+        if labels[i] != -1:
+            clusterDict[labels[i]].addMarker([item[0], item[1]])
+            print("adding" + str(item[0]) + str(item[1]) + " to " + str(labels[i]))
+            total+=1
+            print(total)
+    app.run(debug=True)
