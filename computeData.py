@@ -9,7 +9,7 @@ import json
 from sklearn.cluster import MeanShift, estimate_bandwidth
 from flask import Flask, render_template
 from modele import cluster
-
+from random import randint
 app = Flask(__name__)
 X = []
 labels = []
@@ -24,6 +24,8 @@ def initialize():
 def computeClusters(df):
     # select latitude and longitude
     X = df.ix[:, 7:9].values
+    for item in X:
+        item[0] += randint(0, 9)*0.0001
     ###########################################################################
     # Compute clustering with MeanShift
 
